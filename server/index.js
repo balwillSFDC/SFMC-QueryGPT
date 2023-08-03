@@ -7,7 +7,7 @@ const { readFileSync }    = require('fs')
 const axios               = require('axios')
 const env                 = require('dotenv').config()
 const bodyParser          = require('body-parser')
-const sfmcHelper          = require('./sfmcHelper')
+const helper              = require('./helper.js')
 const clientId            = process.env.REACT_APP_SFMC_CLIENTID;
 const clientSecret        = process.env.REACT_APP_SFMC_CLIENTSECRET;
 const stack               = process.env.REACT_APP_SFMC_STACK;
@@ -44,6 +44,7 @@ if (!isDev && cluster.isMaster) {
   // =======================================================
   
   // Get Auth Code
+  // for web app
   app.get('/api/authcode', (req, res) => {    
     axios({
       url: `${authOrigin}/v2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodedRedirectUri}`,
@@ -81,17 +82,31 @@ if (!isDev && cluster.isMaster) {
       .catch(error => console.log(error.response))
   })
 
+
+  app.post('/api/querybuilder', (req, res) => {
+    
+  })
+
   // All remaining requests return the React app, so it can handle routing
   app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, '../react-ui/build', 'index.html'))
   })
 
   // Creates Server using 'HTTPS' protocol
-  https.createServer({
-    key: readFileSync('server.key'),
-    cert: readFileSync('server.cert')
-  }, app).listen(PORT, () => {
-    console.error(`Node ${isDev ? 'dev server' : 'cluster worker '+process.pid}: listening on port ${PORT}`);
-  })
+  // https.createServer({
+  //   key: readFileSync('server.key'),
+  //   cert: readFileSync('server.cert')
+  // }, app).listen(PORT, () => {
+  //   console.error(`Node ${isDev ? 'dev server' : 'cluster worker '+process.pid}: listening on port ${PORT}`);
+  // })
+
+  app.listen(PORT, () => {
+    console.log(
+      `Node ${
+        isDev ? 'dev server' : 'cluster worker ' + process.pid
+      }: listening on port ${PORT}`
+    );
+  });
+  
 
 }
