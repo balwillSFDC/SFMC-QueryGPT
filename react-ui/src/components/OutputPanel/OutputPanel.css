@@ -1,5 +1,9 @@
-#resultPanel {
+#outputPanel {
     width: 40%;
     height: 50em;
     box-sizing: border-box;
+}
+
+#outputFieldArea {
+  padding: 2em;
 }

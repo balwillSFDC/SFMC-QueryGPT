@@ -3,3 +3,7 @@
     height: 50em;
     box-sizing: border-box;
 }
+
+#fieldArea {
+  padding: 2em
+}

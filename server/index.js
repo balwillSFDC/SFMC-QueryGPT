@@ -16,6 +16,8 @@ const authOrigin          = process.env.REACT_APP_SFMC_AUTHORIGIN;
 const soapOrigin          = process.env.REACT_APP_SFMC_SOAPORIGIN;
 const redirectUri         = process.env.REACT_APP_REDIRECTURI
 const encodedRedirectUri  = encodeURIComponent(redirectUri)
+let Queue = require('bull');
+let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 
 const isDev = process.env.NODE_ENV !== 'production'
 const PORT = process.env.port || 5000
@@ -38,6 +40,12 @@ if (!isDev && cluster.isMaster) {
 
   // Priority serve any static files
   app.use(express.static(path.resolve(__dirname, '../react-ui/build')))
+  // =======================================================
+  // QUEUES
+  // =======================================================
+  let queryBuilderQueue = new Queue('queryBuilder', REDIS_URL);
+
+  
 
   // =======================================================
   // ROUTES
@@ -87,11 +95,27 @@ if (!isDev && cluster.isMaster) {
     let sourceDataExtensionName = req.body.sourceDataExtensionName
     let targetDataExtensionName = req.body.targetDataExtensionName
     let queryDescription = req.body.queryDescription
+    
+    let job = await queryBuilderQueue.add({
+      jobType: 'EXECUTE_QUERY_BUILDER',
+      userInput: {sourceDataExtensionName, targetDataExtensionName, queryDescription}
+    })
+
+    res.json({
+      id: job.id,
+      state: await job.getState()
+    })
+    
+
 
     let queryResult = await helper.executeQueryBuilder(sourceDataExtensionName, targetDataExtensionName, queryDescription)
 
     res.send({queryResult})
    
+  })
+
+  app.get('/api/querybuilder/:id', async (req, res) => {
+    
   })
 
   // All remaining requests return the React app, so it can handle routing

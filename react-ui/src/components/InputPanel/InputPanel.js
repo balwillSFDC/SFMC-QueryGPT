@@ -2,6 +2,7 @@ import {connect} from 'react-redux'
 import React from 'react'
 import {Card} from '@salesforce/design-system-react'
 import './InputPanel.css'
+import InputFields from '../InputFields/InputFields'
 
 
 const mapStateToProps = state => {
@@ -12,11 +13,13 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
 	return {dispatch}
+  
 }
 
 class InputPanel extends React.Component {
 	constructor() {
-			super()
+    super()
+    
 	}
 
 	componentDidMount() {
@@ -26,9 +29,12 @@ class InputPanel extends React.Component {
 	render() {
 		return(
 			<Card
-				id="inputPanel"
-			>
-
+        id="inputPanel"
+        heading="Welcome to QueryGPT"
+      >
+        <div id="fieldArea">
+          <InputFields /> 
+        </div>
 			</Card>
 		)
 	}

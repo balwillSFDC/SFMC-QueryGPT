@@ -1,14 +1,10 @@
 const initialState = {
-  authCode: '',
-  authCodeLogin: '',
-  retrievingAuthCode: false,
-  authCodeRetrieved: false,
-  accessToken: '',
-  retrievingAccessToken: false,
-  accessTokenRetrieved: false,
-  refreshToken: '',
-  tokenExpirationSeconds: 0,
-  buttonClicked: false,
+  sourceDataExtensionName: '',
+  targetDataExtensionName: '',
+  queryDescription: '',
+  queryBuilderJobId: 0,
+  queryBuilderJobState: '',
+  queryBuilderJobResult: '',
 }
 
 const customMiddleWare = store => next => action => {
@@ -20,42 +16,23 @@ const customMiddleWare = store => next => action => {
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-
+    case 'SET_INPUT_VALUE':
+      return {
+        ...state,
+        [action.payload.name]: action.payload.value
+      }
     
-    // case 'FETCH_AUTHORIZATION_CODE_REQUEST':
-    //   return {
-    //     ...state,
-    //     retrievingAuthCode: true
-    //   }
-    // case 'FETCH_AUTHORIZATION_CODE_SUCCESS':
-    //   return {
-    //     ...state,
-    //     retrievingAuthCode: false,
-    //     authCodeRetrieved: true,
-    //     authCodeLogin: action.payload.authCodeLogin
-    //   }
-    // case 'FETCH_AUTHORIZATION_CODE_FAILURE':
-    //   return {
-    //     ...state,
-    //     retrievingAuthCode: false,
-    //     authCodeRetrieved: false,
-    //     authCode: ''
-    //   }
-    // case 'FETCH_ACCESS_TOKEN_REQUEST':
-    //   return {
-    //     ...state,
-    //     retrievingAccessToken: true
-    //   }
-    // case 'FETCH_ACCESS_TOKEN_SUCCESS':
-    //   return {
-    //     ...state,
-    //     retrievingAccessToken: false,
-    //     accessTokenRetrieved: true,
-    //     accessToken: action.payload.accessToken,
-    //     refreshToken: action.payload.refreshToken,
-    //     tokenExpirationSeconds: action.payload.tokenExpirationSeconds,
-    //   }
-    // case 'FETCH_ACCESS_TOKEN_FAILURE':
+    case 'HANDLE_SUBMIT': 
+      
+      
+      return {
+        
+      }
+    
+    case 'EXECUTE_QUERY_BUILDER':
+      break;
+      
+
     default:
       return state;
   }

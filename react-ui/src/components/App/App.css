@@ -5,6 +5,7 @@
   flex-direction: row;
   justify-content: center;  /* Horizontally aligns items in the center */
   flex-wrap: wrap;
+  padding-top: 5em
 }
 
 .slds-card + .slds-card {
