@@ -12,6 +12,8 @@ export const setInputValue = (name, value) => {
 }  
 
 export const handleSubmit = (sourceDataExtensionName, targetDataExtensionName, queryDescription) => {
+  
+  
   return (dispatch) => {
     dispatch({
       type: 'HANDLE_SUBMIT',
