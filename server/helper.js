@@ -32,7 +32,7 @@ const sfmcNode = new ET_Client(clientId, clientSecret, stack, {
 
 
 
-async function executeQueryBuilder(sourceDataExtensionName, targetDataExtensionName, queryDescription) {
+async function executeQueryGPT(sourceDataExtensionName, targetDataExtensionName, queryDescription) {
   let targetDataExtensionFields = await retrieveDataExtensionFields(targetDataExtensionName)
 
   let sourceDataExtensionFields
@@ -151,7 +151,7 @@ async function executeQueryBuilder(sourceDataExtensionName, targetDataExtensionN
     const chatCompletion = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
       messages: [
-        { role: "system", content: "Your name is QueryBuilder and your primary function is to create SQL queries for Salesforce Marketing Cloud Users. You will be provided with the following items and it is your job is to output only the SQL query: 1. Source Target Data Extension name and fields in an array of objects format 2. Target Data Extension name and fields in an array of objects format 3. User input that explains the description of the SQL query that needs to be built. You must use SELECT statements only. Do not use asterisks and instead specify the field names." },
+        { role: "system", content: "Your name is queryGPT and your primary function is to create SQL queries for Salesforce Marketing Cloud Users. You will be provided with the following items and it is your job is to output only the SQL query: 1. Source Target Data Extension name and fields in an array of objects format 2. Target Data Extension name and fields in an array of objects format 3. User input that explains the description of the SQL query that needs to be built. You must use SELECT statements only. Do not use asterisks and instead specify the field names." },
         { role: "user", content: `My source data extension is ${JSON.stringify(sourceDataExtensionName)}. The following is an array of objects representing the the source data extensions fields as well as any additional metadata needed ${JSON.stringify(sourceDataExtensionFields)}. The field names are stored in the "name" property. My target data extension is ${JSON.stringify(targetDataExtensionName)}. The following is an array of objects representing the source data extensions fields as well as any additional metadata needed ${JSON.stringify(targetDataExtensionFields)}. Again, the field names are stored in the "name" property. Take the following query description and only output SQL code: ${JSON.stringify(queryDescription)}` },
       ],
     });
@@ -164,7 +164,7 @@ async function executeQueryBuilder(sourceDataExtensionName, targetDataExtensionN
 // let sourceDataExtensionName = "_subscribers"
 // let targetDataExtensionName = "ContactsAndLeads"
 // queryDescription = "I want to pull a list of all subscribers who have joined in the last year. SubscriberKey should go in the UniqueId field. If SubscriberKey starts with '003', the Object field should equal 'lead' if it starts with '00q' it should be 'contact'"
-// executeQueryBuilder(sourceDataExtensionName, targetDataExtensionName, queryDescription)
+// executeQueryGPT(sourceDataExtensionName, targetDataExtensionName, queryDescription)
 
 async function retrieveDataExtensionCustomerKey(dataExtensionName) {
   let props = [
@@ -235,5 +235,5 @@ async function retrieveDataExtensionFields(dataExtensionName) {
 }
   
 module.exports = {
-  executeQueryBuilder
+  executeQueryGPT
 }

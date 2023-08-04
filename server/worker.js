@@ -2,7 +2,7 @@
 const throng = require('throng');
 const Queue = require('bull');
 const {
-  executeQueryBuilder
+  executequeryGPT
 } = require('./helper')
 
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
@@ -10,13 +10,15 @@ let workers = process.env.WEB_CONCURRENCY || 2;
 let maxJobsPerWorker = 50;
 
 function start() {
-  let queryBuilderQueue = new Queue('queryBuilder', REDIS_URL)
+  let queryGPTQueue = new Queue('queryGPT', REDIS_URL)
 
-  queryBuilderQueue.process(maxJobsPerWorker, async (job) => {
+  queryGPTQueue.process(maxJobsPerWorker, async (job) => {
+    let {sourceDataExtensionName, targetDataExtensionName, queryDescription} = job.data.userInput
+
     console.log(job.data) 
-    if (job.data.jobType == 'EXECUTE_QUERY_BUILDER') {
-      let queryBuilderResults = await executeQueryBuilder()
-      return queryBuilderResults
+    if (job.data.jobType == 'EXECUTE_QUERYGPT') {
+      let queryGPTResults = await executequeryGPT(sourceDataExtensionName, targetDataExtensionName, queryDescription)
+      return queryGPTResults
     }
   })
 }

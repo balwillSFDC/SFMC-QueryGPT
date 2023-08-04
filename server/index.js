@@ -7,7 +7,6 @@ const { readFileSync }    = require('fs')
 const axios               = require('axios')
 const env                 = require('dotenv').config()
 const bodyParser          = require('body-parser')
-const helper              = require('./helper.js')
 const clientId            = process.env.REACT_APP_SFMC_CLIENTID;
 const clientSecret        = process.env.REACT_APP_SFMC_CLIENTSECRET;
 const stack               = process.env.REACT_APP_SFMC_STACK;
@@ -43,7 +42,7 @@ if (!isDev && cluster.isMaster) {
   // =======================================================
   // QUEUES
   // =======================================================
-  let queryBuilderQueue = new Queue('queryBuilder', REDIS_URL);
+  let queryGPTQueue = new Queue('queryGPT', REDIS_URL);
 
   
 
@@ -91,31 +90,28 @@ if (!isDev && cluster.isMaster) {
   })
 
 
-  app.post('/api/querybuilder', async (req, res) => {
+  app.post('/api/queryGPT', async (req, res) => {
     let sourceDataExtensionName = req.body.sourceDataExtensionName
     let targetDataExtensionName = req.body.targetDataExtensionName
     let queryDescription = req.body.queryDescription
     
-    let job = await queryBuilderQueue.add({
-      jobType: 'EXECUTE_QUERY_BUILDER',
+    let job = await queryGPTQueue.add({
+      jobType: 'EXECUTE_QUERYGPT',
       userInput: {sourceDataExtensionName, targetDataExtensionName, queryDescription}
     })
 
     res.json({
       id: job.id,
       state: await job.getState()
-    })
-    
-
-
-    let queryResult = await helper.executeQueryBuilder(sourceDataExtensionName, targetDataExtensionName, queryDescription)
-
-    res.send({queryResult})
-   
+    })   
   })
 
-  app.get('/api/querybuilder/:id', async (req, res) => {
-    
+  app.get('/api/queryGPT/:id', async (req, res) => {
+    let id = req.params.id 
+
+    if (id) {
+      let job = await queryGPTQueue
+    }
   })
 
   // All remaining requests return the React app, so it can handle routing

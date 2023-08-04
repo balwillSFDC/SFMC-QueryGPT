@@ -2,9 +2,9 @@ const initialState = {
   sourceDataExtensionName: '',
   targetDataExtensionName: '',
   queryDescription: '',
-  queryBuilderJobId: 0,
-  queryBuilderJobState: '',
-  queryBuilderJobResult: '',
+  queryGPTJobId: 0,
+  queryGPTJobState: '',
+  queryGPTJobResult: '',
 }
 
 const customMiddleWare = store => next => action => {
@@ -29,7 +29,12 @@ const reducer = (state = initialState, action) => {
         
       }
     
-    case 'EXECUTE_QUERY_BUILDER':
+    case 'EXECUTE_QUERYGPT':
+      return {
+        ...state,
+        queryGPTJobId: action.payload.id,
+        queryGPTJobState: action.payload.jobState
+      }
       break;
       
 
