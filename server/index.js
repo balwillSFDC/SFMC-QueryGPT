@@ -83,8 +83,15 @@ if (!isDev && cluster.isMaster) {
   })
 
 
-  app.post('/api/querybuilder', (req, res) => {
-    
+  app.post('/api/querybuilder', async (req, res) => {
+    let sourceDataExtensionName = req.body.sourceDataExtensionName
+    let targetDataExtensionName = req.body.targetDataExtensionName
+    let queryDescription = req.body.queryDescription
+
+    let queryResult = await helper.executeQueryBuilder(sourceDataExtensionName, targetDataExtensionName, queryDescription)
+
+    res.send({queryResult})
+   
   })
 
   // All remaining requests return the React app, so it can handle routing

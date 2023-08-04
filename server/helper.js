@@ -155,16 +155,16 @@ async function executeQueryBuilder(sourceDataExtensionName, targetDataExtensionN
         { role: "user", content: `My source data extension is ${JSON.stringify(sourceDataExtensionName)}. The following is an array of objects representing the the source data extensions fields as well as any additional metadata needed ${JSON.stringify(sourceDataExtensionFields)}. The field names are stored in the "name" property. My target data extension is ${JSON.stringify(targetDataExtensionName)}. The following is an array of objects representing the source data extensions fields as well as any additional metadata needed ${JSON.stringify(targetDataExtensionFields)}. Again, the field names are stored in the "name" property. Take the following query description and only output SQL code: ${JSON.stringify(queryDescription)}` },
       ],
     });
-    console.log(chatCompletion.data.choices[0].message.content);
+    return chatCompletion.data.choices[0].message.content
   } catch (error) {
     console.error('Error:', error);
   }
 }
 
-let sourceDataExtensionName = "_subscribers"
-let targetDataExtensionName = "ContactsAndLeads"
-queryDescription = "I want to pull a list of all subscribers who have joined in the last year. SubscriberKey should go in the UniqueId field. If SubscriberKey starts with '003', the Object field should equal 'lead' if it starts with '00q' it should be 'contact'"
-executeQueryBuilder(sourceDataExtensionName, targetDataExtensionName, queryDescription)
+// let sourceDataExtensionName = "_subscribers"
+// let targetDataExtensionName = "ContactsAndLeads"
+// queryDescription = "I want to pull a list of all subscribers who have joined in the last year. SubscriberKey should go in the UniqueId field. If SubscriberKey starts with '003', the Object field should equal 'lead' if it starts with '00q' it should be 'contact'"
+// executeQueryBuilder(sourceDataExtensionName, targetDataExtensionName, queryDescription)
 
 async function retrieveDataExtensionCustomerKey(dataExtensionName) {
   let props = [
@@ -234,3 +234,6 @@ async function retrieveDataExtensionFields(dataExtensionName) {
   });
 }
   
+module.exports = {
+  executeQueryBuilder
+}
