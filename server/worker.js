@@ -16,8 +16,12 @@ function start() {
     let {sourceDataExtensionName, targetDataExtensionName, queryDescription} = job.data.userInput
 
     if (job.data.jobType == 'EXECUTE_QUERYGPT') {
-      let queryGPTResults = await executeQueryGPT(sourceDataExtensionName, targetDataExtensionName, queryDescription)
-      return queryGPTResults
+      try {
+        let queryGPTResults = await executeQueryGPT(sourceDataExtensionName, targetDataExtensionName, queryDescription)
+        return queryGPTResults
+      } catch(e) {
+        console.log(e)
+      }
     }
   })
 
