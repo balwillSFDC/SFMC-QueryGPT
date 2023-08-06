@@ -36,7 +36,6 @@ class App extends React.Component {
       >
         <InputPanel /> 
         <OutputPanel /> 
-        <SubmitButton /> 
       </BrandBand>
     );
   }

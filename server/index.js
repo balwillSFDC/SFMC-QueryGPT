@@ -17,6 +17,7 @@ const redirectUri         = process.env.REACT_APP_REDIRECTURI
 const encodedRedirectUri  = encodeURIComponent(redirectUri)
 let Queue = require('bull');
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+const cors = require('cors')
 
 const isDev = process.env.NODE_ENV !== 'production'
 const PORT = process.env.port || 5000
@@ -36,14 +37,16 @@ if (!isDev && cluster.isMaster) {
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
   app.use(bodyParser.json())
+  app.use(cors())
 
   // Priority serve any static files
   app.use(express.static(path.resolve(__dirname, '../react-ui/build')))
+
+
   // =======================================================
   // QUEUES
   // =======================================================
   let queryGPTQueue = new Queue('queryGPT', REDIS_URL);
-
   
 
   // =======================================================
@@ -90,27 +93,29 @@ if (!isDev && cluster.isMaster) {
   })
 
 
-  app.post('/api/queryGPT', async (req, res) => {
-    let sourceDataExtensionName = req.body.sourceDataExtensionName
-    let targetDataExtensionName = req.body.targetDataExtensionName
-    let queryDescription = req.body.queryDescription
-    
-    let job = await queryGPTQueue.add({
-      jobType: 'EXECUTE_QUERYGPT',
-      userInput: {sourceDataExtensionName, targetDataExtensionName, queryDescription}
-    })
+  app.post('/api/queryGPT/', async (req, res) => {
 
-    res.json({
-      id: job.id,
-      state: await job.getState()
-    })   
+    const { sourceDataExtensionName, targetDataExtensionName, queryDescription } = req.body
+
+    try {
+      const job = await queryGPTQueue.add({
+        jobType: 'EXECUTE_QUERYGPT',
+        userInput: {sourceDataExtensionName, targetDataExtensionName, queryDescription}
+      })
+     
+      res.json({ jobState: await job.getState(), job })   
+    } catch (error) {
+      res.json({error})
+    }
+    
   })
 
   app.get('/api/queryGPT/:id', async (req, res) => {
     let id = req.params.id 
 
     if (id) {
-      let job = await queryGPTQueue
+      let job = await queryGPTQueue.getJob(id)
+      res.json({ id, job, jobState: await job.getState() })
     }
   })
 

@@ -1,12 +1,11 @@
 #submitButton {
-  width: 25em;
-  height: auto;
+  margin: auto
 } 
 
 #div_submitButton {
   width: 100%;
   justify-content: center;
   display: flex;
-  margin-top: 2em;
+  margin-top: 1em;
   height: 4em
 }

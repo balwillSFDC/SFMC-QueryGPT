@@ -3,6 +3,7 @@ import React from 'react'
 import {Card} from '@salesforce/design-system-react'
 import './OutputPanel.css'
 import OutputFields from '../OutputFields/OutputFields'
+import CopyButton from '../CopyButton/CopyButton'
 
 
 const mapStateToProps = state => {
@@ -32,6 +33,7 @@ class OutputPanel extends React.Component {
       >
         <div id="outputFieldArea">
           <OutputFields />
+		  <CopyButton /> 
         </div>
 			</Card>
 		)

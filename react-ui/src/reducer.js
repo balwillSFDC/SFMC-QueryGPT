@@ -22,21 +22,31 @@ const reducer = (state = initialState, action) => {
         [action.payload.name]: action.payload.value
       }
     
-    case 'HANDLE_SUBMIT': 
-      
-      
-      return {
-        
-      }
-    
-    case 'EXECUTE_QUERYGPT':
+    case 'SUBMIT_QUERYGPT_REQUEST_TRIGGERED':
       return {
         ...state,
-        queryGPTJobId: action.payload.id,
-        queryGPTJobState: action.payload.jobState
+        queryGPTJobResult: action.payload.queryGPTJobResult
       }
-      break;
-      
+
+    case 'SUBMIT_QUERYGPT_REQUEST_JOB_ADDED': 
+      return {
+        ...state,
+        queryGPTJobId: action.payload.queryGPTJobId,
+        queryGPTJobState: action.payload.queryGPTJobState
+      }
+    
+    case 'SUBMIT_QUERYGPT_REQUEST_RETRIEVE_RESULT': 
+      return {
+        ...state
+      }
+
+    case 'SUBMIT_QUERYGPT_REQUEST_RETRIEVE_RESULT_SUCCESS':
+      return {
+        ...state,
+        queryGPTJobId: action.payload.queryGPTJobId,
+        queryGPTJobState: action.payload.queryGPTJobState,
+        queryGPTJobResult: action.payload.queryGPTJobResult
+      }      
 
     default:
       return state;

@@ -2,7 +2,7 @@
 const throng = require('throng');
 const Queue = require('bull');
 const {
-  executequeryGPT
+  executeQueryGPT
 } = require('./helper')
 
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
@@ -15,12 +15,15 @@ function start() {
   queryGPTQueue.process(maxJobsPerWorker, async (job) => {
     let {sourceDataExtensionName, targetDataExtensionName, queryDescription} = job.data.userInput
 
-    console.log(job.data) 
     if (job.data.jobType == 'EXECUTE_QUERYGPT') {
-      let queryGPTResults = await executequeryGPT(sourceDataExtensionName, targetDataExtensionName, queryDescription)
+      let queryGPTResults = await executeQueryGPT(sourceDataExtensionName, targetDataExtensionName, queryDescription)
       return queryGPTResults
     }
   })
+
+  queryGPTQueue.on('failed', (job, err) => {
+    console.log(`Job ${job.id} failed with error ${err.message}`);
+  });
 }
 
 // Initialize the clustered worker process

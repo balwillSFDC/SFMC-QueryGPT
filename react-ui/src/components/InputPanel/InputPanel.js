@@ -3,6 +3,7 @@ import React from 'react'
 import {Card} from '@salesforce/design-system-react'
 import './InputPanel.css'
 import InputFields from '../InputFields/InputFields'
+import SubmitButton from '../SubmitButton/SubmitButton'
 
 
 const mapStateToProps = state => {
@@ -34,6 +35,8 @@ class InputPanel extends React.Component {
       >
         <div id="fieldArea">
           <InputFields /> 
+					<SubmitButton /> 
+
         </div>
 			</Card>
 		)

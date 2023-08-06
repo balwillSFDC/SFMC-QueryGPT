@@ -12,8 +12,8 @@ const mapStateToProps = state => {
 	}
 }
 
-const mapDispatchToProps = dispatch => {
-	return {dispatch}
+const mapDispatchToProps = {
+  setInputValue
 }
 
 
@@ -29,7 +29,7 @@ class InputFields extends React.Component {
   
   handleChange = (event) => {
     const { name, value } = event.target
-    this.props.dispatch(setInputValue(name, value))
+    this.props.setInputValue(name, value)
   }
 
 	render() {
