@@ -1,7 +1,7 @@
 {
-    "name": "SFMC Technical Audit Dashboard",
-    "description": "The SFMC Audit dashboard gives Admins a 360 view of their Account in an instant.",
-    "repository": "https://github.com/balwillSFDC/sfmc-audit-dashboard",
+    "name": "SFMC QueryGPT",
+    "description": "The intuitive query builder with advanced natural language processing capabilities!",
+    "repository": "https://github.com/balwillSFDC/SFMC-QueryGPT",
     "keywords": ["Salesforce", "Marketing Cloud", "SFMC"],
     "addons": ["heroku-redis"],
     "buildpacks": [
