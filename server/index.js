@@ -1,6 +1,5 @@
 const express             = require('express')
 const path                = require('path')
-const numCPUs             = require('os').cpus().length
 const { readFileSync }    = require('fs')
 const axios               = require('axios')
 const env                 = require('dotenv').config()
@@ -11,8 +10,6 @@ const stack               = process.env.REACT_APP_SFMC_STACK;
 const origin              = process.env.REACT_APP_SFMC_ORIGIN;
 const authOrigin          = process.env.REACT_APP_SFMC_AUTHORIGIN;
 const soapOrigin          = process.env.REACT_APP_SFMC_SOAPORIGIN;
-const redirectUri         = process.env.REACT_APP_REDIRECTURI
-const encodedRedirectUri  = encodeURIComponent(redirectUri)
 let Queue = require('bull');
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 const cors = require('cors')
@@ -40,46 +37,6 @@ let queryGPTQueue = new Queue('queryGPT', REDIS_URL);
 // =======================================================
 // ROUTES
 // =======================================================
-
-// Get Auth Code
-// for web app
-app.get('/api/authcode', (req, res) => {    
-  axios({
-    url: `${authOrigin}/v2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodedRedirectUri}`,
-    method: 'GET'
-  })
-    .then(response => {
-      res.json(response.request.res.responseUrl)
-    })
-    .catch(error => console.log(error))
-})
-
-// Get Access Token
-app.post('/api/accesstoken', (req, res) => {
-  
-  let body = {
-    grant_type: 'authorization_code',
-    code: req.body.code,
-    client_id: clientId,
-    client_secret: clientSecret,
-    redirect_uri: redirectUri,
-    scope: 'offline'
-  }
-
-  axios({
-    url: `${authOrigin}/v2/token`,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    data: JSON.stringify(body)
-  })
-    .then(response => {
-      res.send(response.data)
-    })
-    .catch(error => console.log(error.response))
-})
-
 
 app.post('/api/queryGPT/', async (req, res) => {
 

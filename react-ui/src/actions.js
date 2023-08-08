@@ -1,5 +1,4 @@
 import axios from 'axios'
-const baseURL = process.env.NODE_ENV === 'production' ? process.env.HEROKU_URL : 'http://localhost:5000'
 
 export const setInputValue = (name, value) => {
   return (dispatch) => {
@@ -22,7 +21,7 @@ export const submitQueryGPTRequest = (sourceDataExtensionName, targetDataExtensi
     let endpoint = '/api/queryGPT/' 
     let data = { sourceDataExtensionName, targetDataExtensionName, queryDescription}
     try {
-      const response = await axios.post(`${baseURL + endpoint}`, data)
+      const response = await axios.post(`${endpoint}`, data)
       let queryGPTJobId = response.data.job.id
       let queryGPTJobState = response.data.jobState
   
@@ -44,7 +43,7 @@ export const retrieveResult = (id) => {
     let endpoint = `/api/queryGPT/${id}`
     
     try {
-      const response = await axios.get(`${baseURL + endpoint}`)
+      const response = await axios.get(`${endpoint}`)
       let queryGPTJobId = response.data.job.id
       let queryGPTJobState = response.data.jobState
       let queryGPTJobResult = response.data.job.returnvalue
