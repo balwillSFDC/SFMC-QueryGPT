@@ -1,2 +1,2 @@
 web: node server
-worker: node worker.js
+worker: node server/worker.js
