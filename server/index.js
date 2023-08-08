@@ -18,7 +18,7 @@ let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 const cors = require('cors')
 
 const isDev = process.env.NODE_ENV !== 'production'
-const PORT = process.env.port || 5000
+const PORT = process.env.PORT || 5000
 
 
 const app = express();
@@ -111,14 +111,6 @@ app.get('/api/queryGPT/:id', async (req, res) => {
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../react-ui/build', 'index.html'))
 })
-
-// Creates Server using 'HTTPS' protocol
-// https.createServer({
-//   key: readFileSync('server.key'),
-//   cert: readFileSync('server.cert')
-// }, app).listen(PORT, () => {
-//   console.error(`Node ${isDev ? 'dev server' : 'cluster worker '+process.pid}: listening on port ${PORT}`);
-// })
 
 app.listen(PORT, () => {
   console.log(
