@@ -5,7 +5,6 @@ import './OutputPanel.css'
 import OutputFields from '../OutputFields/OutputFields'
 import CopyButton from '../CopyButton/CopyButton'
 
-
 const mapStateToProps = state => {
 	return {
 
@@ -22,7 +21,6 @@ class OutputPanel extends React.Component {
 	}
 
 	componentDidMount() {
-
 	}
 
 	render() {

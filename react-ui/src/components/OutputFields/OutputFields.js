@@ -31,23 +31,31 @@ class OutputFields extends React.Component {
 	}
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.queryGPTJobId !== this.props.queryGPTJobId && this.props.queryGPTJobState !== 'completed') {
-      console.log("need to retrieve results ")
+    // If the job ID has changed and the job isn't completed or failed
+    if (
+      prevProps.queryGPTJobId !== this.props.queryGPTJobId && 
+      this.props.queryGPTJobId !== 0 &&
+      this.props.queryGPTJobState !== "completed" && 
+      this.props.queryGPTJobState !== "failed"
+    ) {
+      console.log("triggering retrieve result interval...")
+
       let retrieveResultInterval = setInterval(() => {
-        this.setState({retrieveResultCount: this.state.retrieveResultCount + 1 })
-        this.props.retrieveResult(this.props.queryGPTJobId)
-        
-      }, 2000)
-      this.setState({retrieveResultInterval})
-    }
+        if (
+          this.props.queryGPTJobState !== 'completed' &&
+          this.props.queryGPTJobState !== 'failed' && 
+          this.state.retrieveResultCount < 30
+        ) {
+          this.setState({retrieveResultCount: this.state.retrieveResultCount + 1 });
+          console.log("call retrieveResult()")
+          this.props.retrieveResult(this.props.queryGPTJobId);
+        } else {
+          clearInterval(this.state.retrieveResultInterval)
+        }
+      }, 2000);
+      
 
-    if (prevProps.queryGPTJobState !== 'completed' && (this.props.queryGPTJobState === 'completed' || this.props.queryGPTJobState === 'failed')) {
-      clearInterval(this.state.retrieveResultInterval)
-      this.setState({retrieveResultCount: 0})
-    }
-
-    if(this.state.retrieveResultCount >= 30) {
-      clearInterval(this.state.retrieveResultInterval)
+      this.setState({retrieveResultInterval});
     }
   }
 
@@ -58,8 +66,8 @@ class OutputFields extends React.Component {
           assistiveText={{ label: 'My label' }}
           label="Query Output"
           id="queryOutput"
-          readOnly
-          value={this.props.queryGPTJobResult || ''} 
+          readOnly={true}
+          value={this.props.queryGPTJobState !== "failed"  ? this.props.queryGPTJobResult : '' } 
         />
       </section>
 		)

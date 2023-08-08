@@ -43,8 +43,11 @@ async function executeQueryGPT(sourceDataExtensionName, targetDataExtensionName,
     throw new Error('Invalid or missing queryDescription');
   }
 
-
-  let targetDataExtensionFields = await retrieveDataExtensionFields(targetDataExtensionName)
+  // target data extension is optional
+  let targetDataExtensionFields
+  if (targetDataExtensionName) {
+    targetDataExtensionFields = await retrieveDataExtensionFields(targetDataExtensionName)
+  }
 
 
   let sourceDataExtensionFields
@@ -530,7 +533,7 @@ async function executeQueryGPT(sourceDataExtensionName, targetDataExtensionName,
   if (targetDataExtensionFields === "data extension not found" || sourceDataExtensionFields === "data extension not found") {
     let dataExtensionsNotFound = []
     
-    if (sourceDataExtensionName === 'data extension not found') {
+    if (sourceDataExtensionFields === 'data extension not found') {
       dataExtensionsNotFound.push(sourceDataExtensionName)
     }
     
@@ -546,26 +549,30 @@ async function executeQueryGPT(sourceDataExtensionName, targetDataExtensionName,
   }
 
   try {
-    let queryGPTSystemMessage = "Your name is queryGPT and your primary function is to create SQL queries for Salesforce Marketing Cloud Users. You will be provided with the following items and it is your job is to output only the SQL query: 1. Source Target Data Extension name and fields in an array of objects format 2. Target Data Extension name and fields in an array of objects format 3. User input that explains the description of the SQL query that needs to be built. You must use SELECT statements only. Do not use asterisks to grab all fields and instead specify the field names individually."
-    let formattedUserMessage = `My source data extension is ${JSON.stringify(sourceDataExtensionName)}. The following is an array of objects representing the the source data extensions fields as well as any additional metadata needed ${JSON.stringify(sourceDataExtensionFields)}. The field names are stored in the "name" property. The field lengths are stored in "MaxLength". If the field is required then "IsRequired" will equal true. If the field is a primary key then "IsPrimaryKey" will equal true and should be included in the query. My target data extension is ${JSON.stringify(targetDataExtensionName)}. The following is an array of objects representing the source data extensions fields as well as any additional metadata needed ${JSON.stringify(targetDataExtensionFields)}. Again, the field names are stored in the "name" property. Make sure to adhere to all of Salesforce Marketing Cloud query limitations and considerations. Take the following query description and only output SQL code: ${JSON.stringify(queryDescription)}. At the beginning of the query, add a helpful query description surrounded by multiline comment syntax (i.e. /* comment */)`
-    console.log(formattedUserMessage)
+    let queryGPTSystemMessage = "Your name is queryGPT and your primary function is to create SQL queries for Salesforce Marketing Cloud Users. You will be provided with the following items and it is your job is to output only the SQL query: 1. Source Target Data Extension name and fields in an array of objects format 2. Target Data Extension name and fields in an array of objects format 3. User input that explains the description of the SQL query that needs to be built. You must use SELECT statements only. Do not use asterisks to grab all fields and instead specify the field names individually. If you are provided a query description that does not clearly result in you returning a SQL query, ask the user to clarify and explain what you need them to clarify."
+    
+    let formattedUserMessage = `My source data extension is ${JSON.stringify(sourceDataExtensionName)}. The following is an array of objects representing the the source data extensions fields as well as any additional metadata needed ${JSON.stringify(sourceDataExtensionFields)}. The field names are stored in the "name" property. The field lengths are stored in "MaxLength". If the field is required then "IsRequired" will equal true. If the field is a primary key then "IsPrimaryKey" will equal true and should be included in the query. ${!targetDataExtensionName ? '' : `My target data extension is ${JSON.stringify(targetDataExtensionName)}`}. The following is an array of objects representing the source data extensions fields as well as any additional metadata needed ${JSON.stringify(targetDataExtensionFields)}.}  Again, the field names are stored in the "name" property. Make sure to adhere to all of Salesforce Marketing Cloud query limitations and considerations. Take the following query description and only output SQL code: ${JSON.stringify(queryDescription)}.`
 
-    let exampleUserMessage = `My source data extension is "HashedEmails". The following is an array of objects representing the the source data extensions fields as well as any additional metadata needed [{"PartnerKey":"","ObjectID":"","Name":"UniqueId","MaxLength":"50","IsRequired":"true","IsPrimaryKey":"true","FieldType":"Text"},{"PartnerKey":"","ObjectID":"","Name":"hashedEmail","MaxLength":"50","IsRequired":"true","IsPrimaryKey":"false","FieldType":"Text"}]. The field names are stored in the "name" property. The field lengths are stored in "MaxLength". If the field is required then "IsRequired" will equal true. If the field is a primary key then "IsPrimaryKey" will equal true and should be included in the query. My target data extension is "ContactsandLeads". The following is an array of objects representing the source data extensions fields as well as any additional metadata needed [{"PartnerKey":"","ObjectID":"","Name":"hashedEmail","IsRequired":"false","IsPrimaryKey":"false","FieldType":"Text"},{"PartnerKey":"","ObjectID":"","Name":"Object","MaxLength":"50","IsRequired":"false","IsPrimaryKey":"false","FieldType":"Text"},{"PartnerKey":"","ObjectID":"","Name":"RelatedLeadID","MaxLength":"50","IsRequired":"false","IsPrimaryKey":"false","FieldType":"Text"},{"PartnerKey":"","ObjectID":"","Name":"Name","MaxLength":"50","IsRequired":"false","IsPrimaryKey":"false","FieldType":"Text"},{"PartnerKey":"","ObjectID":"","Name":"UniqueId","MaxLength":"50","IsRequired":"true","IsPrimaryKey":"true","FieldType":"Text"}]. Again, the field names are stored in the "name" property. Make sure to adhere to all of Salesforce Marketing Cloud query limitations and considerations. Take the following query description and only output SQL code: "I want to update records in ContactsandLeads with the hashedemail values in hashedemails data extension"`
-    let exampleAssistantMessage = `/* Query Description: This query will update all records in ContactsandLeads Data Extension with hashedemail values from the HashedEmails data extension */ \n \n SELECT \n cl.UniqueId, \n he.hashedEmail \n FROM ContactsandLeads AS cl \n INNER JOIN HashedEmails AS he ON cl.UniqueId = he.UniqueId  `
+    
+    let exampleUserMessage_1 = `My source data extension is "HashedEmails". The following is an array of objects representing the the source data extensions fields as well as any additional metadata needed [{"PartnerKey":"","ObjectID":"","Name":"UniqueId","MaxLength":"50","IsRequired":"true","IsPrimaryKey":"true","FieldType":"Text"},{"PartnerKey":"","ObjectID":"","Name":"hashedEmail","MaxLength":"50","IsRequired":"true","IsPrimaryKey":"false","FieldType":"Text"}]. The field names are stored in the "name" property. The field lengths are stored in "MaxLength". If the field is required then "IsRequired" will equal true. If the field is a primary key then "IsPrimaryKey" will equal true and should be included in the query. My target data extension is "ContactsandLeads". The following is an array of objects representing the source data extensions fields as well as any additional metadata needed [{"PartnerKey":"","ObjectID":"","Name":"hashedEmail","IsRequired":"false","IsPrimaryKey":"false","FieldType":"Text"},{"PartnerKey":"","ObjectID":"","Name":"Object","MaxLength":"50","IsRequired":"false","IsPrimaryKey":"false","FieldType":"Text"},{"PartnerKey":"","ObjectID":"","Name":"RelatedLeadID","MaxLength":"50","IsRequired":"false","IsPrimaryKey":"false","FieldType":"Text"},{"PartnerKey":"","ObjectID":"","Name":"Name","MaxLength":"50","IsRequired":"false","IsPrimaryKey":"false","FieldType":"Text"},{"PartnerKey":"","ObjectID":"","Name":"UniqueId","MaxLength":"50","IsRequired":"true","IsPrimaryKey":"true","FieldType":"Text"}]. Again, the field names are stored in the "name" property. Make sure to adhere to all of Salesforce Marketing Cloud query limitations and considerations. Take the following query description and only output SQL code: "I want to update records in ContactsandLeads with the hashedemail values in hashedemails data extension"`
+    let exampleAssistantMessage_1 = `SELECT \n \t cl.UniqueId, \n \t he.hashedEmail \n FROM ContactsandLeads AS cl \n \t INNER JOIN HashedEmails AS he ON cl.UniqueId = he.UniqueId`
     
     const chatCompletion = await openai.createChatCompletion({
       model: "gpt-3.5-turbo-0613",
       messages: [
         { role: "system", content: queryGPTSystemMessage },
-        { role: "user", name: "example_user", content: exampleUserMessage},
-        { role: "assistant", name: "example_assistant", content: exampleAssistantMessage},
+        { role: "user", name: "example_user", content: exampleUserMessage_1},
+        { role: "assistant", name: "example_assistant", content: exampleAssistantMessage_1},
         { role: "user", name: "example_user", content: "Awesome job! I'm going to give you details for another query I want you to write"},
         { role: "user", content: formattedUserMessage },
       ],
       temperature: 0.2,
       top_p: 0.1
     });
-    return chatCompletion.data.choices[0].message.content
+    return {
+      status: "success",
+      result: chatCompletion.data.choices[0].message.content
+    }
   } catch (error) {
     if (error.response) {
       console.log(error.response.status);
@@ -619,9 +626,9 @@ async function retrieveDataExtensionCustomerKey(dataExtensionName) {
   //   FieldType: 'Text'
   // }]
 async function retrieveDataExtensionFields(dataExtensionName) {
-  let customerKey = await retrieveDataExtensionCustomerKey(dataExtensionName);
+  const customerKey = await retrieveDataExtensionCustomerKey(dataExtensionName);
 
-  if (customerKey = 'data extension not found') {
+  if (customerKey === 'data extension not found') {
     return 'data extension not found'
   }
 

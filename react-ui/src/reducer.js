@@ -5,6 +5,7 @@ const initialState = {
   queryGPTJobId: 0,
   queryGPTJobState: '',
   queryGPTJobResult: '',
+  dataExtensionsNotFound: []
 }
 
 const customMiddleWare = store => next => action => {
@@ -16,6 +17,13 @@ const customMiddleWare = store => next => action => {
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
+    case 'RESET_STATE':
+      return {
+        ...state,
+        queryGPTJobId: action.payload.queryGPTJobId,
+        dataExtensionsNotFound: action.payload.dataExtensionsNotFound,
+        queryGPTJobState: action.payload.queryGPTJobState
+      }
     case 'SET_INPUT_VALUE':
       return {
         ...state,
@@ -25,7 +33,8 @@ const reducer = (state = initialState, action) => {
     case 'SUBMIT_QUERYGPT_REQUEST_TRIGGERED':
       return {
         ...state,
-        queryGPTJobResult: action.payload.queryGPTJobResult
+        queryGPTJobResult: action.payload.queryGPTJobResult,
+        dataExtensionsNotFound: action.payload.dataExtensionsNotFound
       }
 
     case 'SUBMIT_QUERYGPT_REQUEST_JOB_ADDED': 
@@ -40,12 +49,27 @@ const reducer = (state = initialState, action) => {
         ...state
       }
 
+    case 'SUBMIT_QUERYGPT_REQUEST_RETRIEVE_RESULT_IN_PROGRESS':
+      return {
+        ...state,
+        queryGPTJobId: action.payload.queryGPTJobId,
+        queryGPTJobState: action.payload.queryGPTJobState
+      }
+
     case 'SUBMIT_QUERYGPT_REQUEST_RETRIEVE_RESULT_SUCCESS':
       return {
         ...state,
         queryGPTJobId: action.payload.queryGPTJobId,
         queryGPTJobState: action.payload.queryGPTJobState,
         queryGPTJobResult: action.payload.queryGPTJobResult
+      }      
+
+    case 'SUBMIT_QUERYGPT_REQUEST_RETRIEVE_RESULT_FAILED':
+      return {
+        ...state,
+        queryGPTJobId: action.payload.queryGPTJobId,
+        queryGPTJobState: action.payload.queryGPTJobState,
+        dataExtensionsNotFound: action.payload.dataExtensionsNotFound
       }      
 
     default:

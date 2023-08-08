@@ -8,7 +8,8 @@ const mapStateToProps = state => {
 	return {
     sourceDataExtensionName: state.sourceDataExtensionName,
     targetDataExtensionName: state.targetDataExtensionName,
-    queryDescription: state.queryDescription
+    queryDescription: state.queryDescription,
+    dataExtensionsNotFound: state.dataExtensionsNotFound
 	}
 }
 
@@ -20,13 +21,39 @@ const mapDispatchToProps = {
 
 class InputFields extends React.Component {
 	constructor() {
-			super()
+    super()
+    this.state = {
+      sourceDataExtensionNameErrorMessage: "",
+      targetDataExtensionNameErrorMessage: ""
+    }
 	}
 
 	componentDidMount() {
 
   }
-  
+
+  componentDidUpdate(prevProps, prevState) {
+    // If dataExtensionsNotFound was not populated, but now is, update the error messages
+    if (prevProps.dataExtensionsNotFound.length === 0 && this.props.dataExtensionsNotFound.length > 0) {
+      this.props.dataExtensionsNotFound.forEach(dataExtension => {
+        // If the value in "Source Data Extension" field includes the DE that was not found, set the error message 
+        if (this.props.sourceDataExtensionName.includes(dataExtension)) {
+          this.setState({sourceDataExtensionNameErrorMessage: `${this.state.sourceDataExtensionNameErrorMessage}${dataExtension} could not be found. `})
+        }
+
+        // If the value in "Target Data Extension" field includes the DE that was not found, set the error message 
+        if (this.props.targetDataExtensionName.includes(dataExtension)) {
+          this.setState({targetDataExtensionNameErrorMessage: `${dataExtension} could not be found `})
+        }
+      })
+    } else if (prevProps.dataExtensionsNotFound.length > 0 && this.props.dataExtensionsNotFound.length === 0) {
+      this.setState({
+        sourceDataExtensionNameErrorMessage: '',
+        targetDataExtensionNameErrorMessage: ''
+      })
+    }
+  }
+
   handleChange = (event) => {
     const { name, value } = event.target
     this.props.setInputValue(name, value)
@@ -45,14 +72,15 @@ class InputFields extends React.Component {
           required
           onChange={this.handleChange}
           value={this.props.sourceDataExtensionName}
-          fieldLevelHelpTooltip={
-            <Tooltip
-              id="field-level-help-tooltip"
-              align="top right"
-              variant="learnMore"
-              content="Some helpful information"
-            />
-          }
+          // fieldLevelHelpTooltip={
+          //   <Tooltip
+          //     id="field-level-help-tooltip"
+          //     align="top right"
+          //     variant="learnMore"
+          //     content="Some helpful information"
+          //   />
+          // }
+          errorText={this.state.sourceDataExtensionNameErrorMessage}
         />
         <Input
           assistiveText={{ label: 'My label' }}
@@ -61,9 +89,10 @@ class InputFields extends React.Component {
           name="targetDataExtensionName"
           className="inputFields"
           placeholder="Target Data Extension Name"
-          required
           onChange={this.handleChange}
           value={this.props.targetDataExtensionName}
+          errorText={this.state.targetDataExtensionNameErrorMessage}
+
         />
         <Textarea
           assistiveText={{ label: 'My label' }}

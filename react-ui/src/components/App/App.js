@@ -7,6 +7,7 @@ import { Button, BrandBand, Card } from '@salesforce/design-system-react';
 import InputPanel from '../InputPanel/InputPanel';
 import OutputPanel from '../OutputPanel/OutputPanel';
 import SubmitButton from '../SubmitButton/SubmitButton';
+import { resetState } from '../../actions';
 
 const mapStateToProps = state => {
   return {
@@ -14,8 +15,8 @@ const mapStateToProps = state => {
   }
 }
 
-const mapDispatchToProps = dispatch => {
-  return { dispatch }
+const mapDispatchToProps = {
+  resetState
 }
 
 class App extends React.Component {
@@ -24,7 +25,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-
+    this.props.resetState()
   }
 
   render() {

@@ -16,7 +16,7 @@ export const submitQueryGPTRequest = (sourceDataExtensionName, targetDataExtensi
   return async (dispatch) => {
     dispatch({
       type: 'SUBMIT_QUERYGPT_REQUEST_TRIGGERED',
-      payload: {queryGPTJobResult: ''}
+      payload: {queryGPTJobResult: '', dataExtensionsNotFound: []}
     })
 
     let endpoint = '/api/queryGPT/' 
@@ -37,7 +37,6 @@ export const submitQueryGPTRequest = (sourceDataExtensionName, targetDataExtensi
 }
 
 export const retrieveResult = (id) => {
-
   return async (dispatch) => {
     dispatch({ 
       type: 'SUBMIT_QUERY_GPT_REQUEST_RETRIEVE_RESULT'
@@ -50,12 +49,55 @@ export const retrieveResult = (id) => {
       let queryGPTJobState = response.data.jobState
       let queryGPTJobResult = response.data.job.returnvalue
 
-      dispatch({
-        type: 'SUBMIT_QUERYGPT_REQUEST_RETRIEVE_RESULT_SUCCESS',
-        payload: {queryGPTJobId, queryGPTJobState, queryGPTJobResult}
-      })
+      switch (queryGPTJobResult?.status) {
+        case 'success':
+          dispatch({
+            type: 'SUBMIT_QUERYGPT_REQUEST_RETRIEVE_RESULT_SUCCESS',
+            payload: {
+              queryGPTJobId, 
+              queryGPTJobState, 
+              queryGPTJobResult: queryGPTJobResult.result
+            }
+          })
+          break;
+
+        case 'failed': 
+          dispatch({
+            type: 'SUBMIT_QUERYGPT_REQUEST_RETRIEVE_RESULT_FAILED',
+            payload: {
+              queryGPTJobId,
+              queryGPTJobState: 'failed',
+              dataExtensionsNotFound: queryGPTJobResult.dataExtensionsNotFound
+            }
+          })
+          break;
+
+        default:
+          dispatch({
+            type: 'SUBMIT_QUERYGPT_REQUEST_RETRIEVE_RESULT_IN_PROGRESS',
+            payload: {
+              queryGPTJobId,
+              queryGPTJobState
+            }
+          })
+      }
+
+ 
     } catch (err) {
       console.error(`Error: ${err}`)
     }
+  }
+}
+
+export const resetState = () => {
+  return (dispatch) => {
+    dispatch({
+      type: "RESET_STATE",
+      payload: {
+        queryGPTJobId: 0, 
+        dataExtensionsNotFound: [],
+        queryGPTJobState: "",
+      }
+    })
   }
 }
