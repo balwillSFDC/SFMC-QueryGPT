@@ -55,8 +55,8 @@ class SubmitButton extends React.Component {
         <Button
           id="submitButton"
           variant="brand"
-					onClick={this.handleSubmit}
-					disabled={this.state.disabled}
+			onClick={this.handleSubmit}
+			disabled={this.state.disabled}
         >
           Generate Query
         </Button>

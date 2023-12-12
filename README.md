@@ -50,3 +50,16 @@ You will need the following before deploying:
   * Open AI API Key -> Set as OPENAI_API_KEY
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/balwillSFDC/sfmc-queryGPT)
+
+
+### FAQ
+- What LLM does this use? 
+  - GPT-4
+- Is my data stored anywhere? 
+  - No. The query is passed through the Einstein Trust Layer, removing PII, obsentities and other sensitive info. Salesforce also has an agreement with Open AI to prevent data being stored 
+- Why didn't you use SF Codegen API? 
+  - Requires security review and process would've taken too long for project timeline 
+- Why didn't you use Conversation API to allow user to continually refine query? 
+  - Conversation API not available in prod or ConnectAPI
+- What's in store for the future?
+  - Use Conversation API to extract and process additional metadata from the request (i.e. additional DEs, complex requirements, etc.)
