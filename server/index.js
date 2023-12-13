@@ -117,7 +117,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../react-ui/build', 'index.html'))
 })
 
-app.listen(PORT, '127.0.0.1', () => {
+app.listen(PORT, () => {
   console.log(
     `Node ${
       isDev ? 'dev server' : 'cluster worker ' + process.pid
