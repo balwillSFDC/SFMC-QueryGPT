@@ -162,8 +162,8 @@ async function executeQueryGPT(sourceDataExtensionName, targetDataExtensionName,
         "useCase": queryDescription,
         "sourceDataExtension": sourceDataExtensionName,
         "sourceDataExtensionFields": sourceDataExtensionFields,
-        "targetDataExtension": targetDataExtensionName,
-        "targetDataExtensionFields": targetDataExtensionFields
+        "targetDataExtension": targetDataExtensionName || '',
+        "targetDataExtensionFields": targetDataExtensionFields || []
       })
     })
 
