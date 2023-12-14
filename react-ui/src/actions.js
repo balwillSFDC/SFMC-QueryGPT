@@ -96,12 +96,16 @@ export const resetState = () => {
       payload: {
         queryGPTJobId: 0, 
         queryGPTJobState: "",
+        queryGPTJobResult: "",
         dataExtensionsNotFound: [],
         sfmc_authUrl: '',
         sfmc_authCode: '',
         runQueryJobId: 0,
         runQueryJobState: '',
-        runQueryJobResult: []
+        runQueryJobResult: [],
+        sourceDataExtensionName: '',
+        targetDataExtensionName: '',
+        queryDescription: ''
       }
     })
 

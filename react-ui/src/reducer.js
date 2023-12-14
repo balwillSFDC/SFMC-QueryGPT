@@ -33,6 +33,7 @@ const reducer = (state = initialState, action) => {
         ...state,
         queryGPTJobId: action.payload.queryGPTJobId,
         queryGPTJobState: action.payload.queryGPTJobState,
+        queryGPTJobResult: action.payload.queryGPTJobResult,
         dataExtensionsNotFound: action.payload.dataExtensionsNotFound,
         sfmc_authUrl: action.payload.sfmc_authUrl,
         sfmc_authCode: action.payload.sfmc_authCode,
@@ -41,7 +42,10 @@ const reducer = (state = initialState, action) => {
         serverAppFlag: action.payload.serverAppFlag,
         runQueryJobId: action.payload.runQueryJobId,
         runQueryJobState: action.payload.runQueryJobState,
-        runQueryJobResult: action.payload.runQueryJobResult
+        runQueryJobResult: action.payload.runQueryJobResult,
+        sourceDataExtensionName: action.payload.sourceDataExtensionName,
+        targetDataExtensionName: action.payload.targetDataExtensionName,
+        queryDescription: action.payload.queryDescription
       }
     case 'SET_INPUT_VALUE':
       return {
