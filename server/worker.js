@@ -28,8 +28,9 @@ function start() {
       try {
         let results = await runQuery(job.data.userInput.query)
         return results
-      } catch(e) {
+      } catch(error) {
         console.log(e)
+        return error
       }
       
     }

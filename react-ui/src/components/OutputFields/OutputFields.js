@@ -1,6 +1,6 @@
 import {connect} from 'react-redux'
 import React from 'react'
-import {Textarea} from '@salesforce/design-system-react'
+import {Spinner, Textarea} from '@salesforce/design-system-react'
 import './OutputFields.css'
 import { retrieveResult } from '../../actions'
 
@@ -22,15 +22,28 @@ class OutputFields extends React.Component {
     super()
     this.state = {
       retrieveResultInterval: null,
-      retrieveResultCount: 0
+      retrieveResultCount: 0,
+      generatingQuery: false
     }
 	}
 
 	componentDidMount() {
-
+    
 	}
 
   componentDidUpdate(prevProps, prevState) {
+    // if queryGPTJobState has changed and it's now active, disable the button
+		if (prevProps.queryGPTJobState !== this.props.queryGPTJobState && this.props.queryGPTJobState === 'active') {
+			this.setState({ generatingQuery: true})
+      this.setState({retrieveResultCount: 0})
+		}
+
+		// if queryGPTJobState was active and now it's not, do not disable button
+		if (prevProps.queryGPTJobState === 'active' && this.props.queryGPTJobState !== 'active') {
+			this.setState({ generatingQuery: false})
+		}
+    
+    
     // If the job ID has changed and the job isn't completed or failed
     if (
       prevProps.queryGPTJobId !== this.props.queryGPTJobId && 
@@ -44,7 +57,7 @@ class OutputFields extends React.Component {
         if (
           this.props.queryGPTJobState !== 'completed' &&
           this.props.queryGPTJobState !== 'failed' && 
-          this.state.retrieveResultCount < 30
+          this.state.retrieveResultCount < 150
         ) {
           this.setState({retrieveResultCount: this.state.retrieveResultCount + 1 });
           console.log("call retrieveResult()")
@@ -62,6 +75,8 @@ class OutputFields extends React.Component {
 	render() {
     return (
       <section>
+        {this.state.generatingQuery ? <Spinner /> : ''}
+
         <Textarea
           assistiveText={{ label: 'My label' }}
           label="Query Output"
@@ -69,6 +84,7 @@ class OutputFields extends React.Component {
           readOnly={true}
           value={this.props.queryGPTJobState !== "failed"  ? this.props.queryGPTJobResult : '' } 
         />
+        
       </section>
 		)
 	}

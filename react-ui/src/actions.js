@@ -44,6 +44,7 @@ export const retrieveResult = (id) => {
     
     try {
       const response = await axios.get(`${endpoint}`)
+      console.log(response.data)
       let queryGPTJobId = response.data.job.id
       let queryGPTJobState = response.data.jobState
       let queryGPTJobResult = response.data.job.returnvalue
@@ -100,7 +101,7 @@ export const resetState = () => {
         sfmc_authCode: '',
         runQueryJobId: 0,
         runQueryJobState: '',
-        // runQueryJobResult: []
+        runQueryJobResult: []
       }
     })
 
@@ -205,7 +206,10 @@ export const addRunQueryJob = (query) => {
   return async (dispatch) => {
     dispatch({
       type: 'ADD_RUN_QUERY_JOB_TRIGGERED',
-      payload: query
+      payload: {
+        query: query, 
+        runQueryJobResult: []
+      }
     })
 
 
@@ -238,6 +242,7 @@ export const retrieveRunQueryResult = (id) => {
     
     try {
       const response = await axios.get(endpoint)
+      console.log(response.data)
       let runQueryJobId = response.data.job.id
       let runQueryJobState = response.data.jobState
       let runQueryJobResult = response.data.job.returnvalue

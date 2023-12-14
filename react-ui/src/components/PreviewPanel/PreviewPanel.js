@@ -24,7 +24,7 @@ class PreviewPanel extends React.Component {
 		this.state = {
 			display: 'none',
 			retrieveResultCount: 0,
-			retrieveResultInterval: ''
+			retrieveResultInterval: '',
 		}
 	}
 
@@ -43,6 +43,10 @@ class PreviewPanel extends React.Component {
 			this.setState({display: 'block'})
 		}
 
+		if (prevProps.runQueryJobState !== '' && this.props.runQueryJobState === '') {
+			this.setState({display: 'none'})
+		}
+
 		// If the job ID has changed and the job isn't completed or failed
     if (
       prevProps.runQueryJobId !== this.props.runQueryJobId && 
@@ -56,7 +60,7 @@ class PreviewPanel extends React.Component {
         if (
           this.props.runQueryJobState !== 'completed' &&
           this.props.runQueryJobState !== 'failed' && 
-          this.state.retrieveResultCount < 30
+          this.state.retrieveResultCount < 150
         ) {
           this.setState({retrieveResultCount: this.state.retrieveResultCount + 1 });
           console.log("call retrieveRunQueryResult()")
@@ -77,7 +81,7 @@ class PreviewPanel extends React.Component {
 		return(
 			<Card
 				id="previewPanel"
-				heading={`${this.props.runQueryJobResult.length} items`}
+				heading={`${this.props.runQueryJobResult?.length} items`}
 				style={{display: this.state.display}}
 		  >
 				<PreviewResults />  

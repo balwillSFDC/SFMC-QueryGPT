@@ -37,10 +37,12 @@ class RunButton extends React.Component {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
+		// if a query job was running and is now finished, do not disable button
 		if (prevProps.runQueryJobState == 'active' && this.props.runQueryJobState != 'active') {
 			this.setState({disabled: false})
 		}
 
+		// if a "run query" job was not active, but now is, disable the button 
 		if (prevProps.runQueryJobState != 'active' && this.props.runQueryJobState == 'active') {
 			this.setState({disabled: true})
 		}

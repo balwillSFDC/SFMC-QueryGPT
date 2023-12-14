@@ -23,7 +23,8 @@ class SubmitButton extends React.Component {
 	constructor() {
 		super()
 		this.state = {
-			disabled: true
+			disabled: true,
+			generatingQuery: false
 		}
 	}
 
@@ -35,12 +36,23 @@ class SubmitButton extends React.Component {
 
 	componentDidUpdate(prevProps, prevState) {
 		// Check if either value is null or an empty string
-		const isDisabled = !this.props.sourceDataExtensionName || !this.props.queryDescription;
+		let isDisabled = !this.props.sourceDataExtensionName || !this.props.queryDescription;
 	
 		// Update the disabled state if it has changed
-		if (isDisabled !== this.state.disabled) {
+		if (isDisabled !== this.state.disabled && this.state.generatingQuery !== true) {
 			this.setState({ disabled: isDisabled });
 		}
+
+		// if queryGPTJobState has changed and it's now active, disable the button
+		if (prevProps.queryGPTJobState !== this.props.queryGPTJobState && this.props.queryGPTJobState === 'active') {
+			this.setState({ disabled: true, generatingQuery: true})
+		}
+
+		// if queryGPTJobState was active and now it's not, do not disable button
+		if (prevProps.queryGPTJobState === 'active' && this.props.queryGPTJobState !== 'active') {
+			this.setState({ disabled: false, generatingQuery: false})
+		}
+
 	}
 	
 	handleSubmit = () => {
@@ -58,7 +70,7 @@ class SubmitButton extends React.Component {
 			onClick={this.handleSubmit}
 			disabled={this.state.disabled}
         >
-          Generate Query
+          {this.state.disabled && this.state.generatingQuery ? 'Running...' : 'Generate Query'}
         </Button>
       </div>
 		)

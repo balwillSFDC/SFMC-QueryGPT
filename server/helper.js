@@ -16,7 +16,7 @@ const qs = require('qs');
 const SFDC_URL = process.env.SFDC_URL
 const SFDC_CLIENTID = process.env.SFDC_CLIENTID
 const SFDC_CLIENTSECRET = process.env.SFDC_CLIENTSECRET
-const sqlParser = require('node-sqlparser');
+const {Parser} = require('node-sql-parser');
 const configuration = new Configuration({
   apiKey: OPENAI_API_KEY
 })
@@ -101,6 +101,7 @@ async function initializeSDK(authCode) {
 
 async function executeQueryGPT(sourceDataExtensionName, targetDataExtensionName, queryDescription) {
   console.log('executing query gpt function')
+
   // Check if sourceDataExtensionName is provided and is a non-empty string
   if (!sourceDataExtensionName || typeof sourceDataExtensionName !== 'string') {
     throw new Error('Invalid or missing sourceDataExtensionName');
@@ -148,24 +149,36 @@ async function executeQueryGPT(sourceDataExtensionName, targetDataExtensionName,
 
   let sfdc_accessToken = await getSfdcAccessToken()
 
+  try {
+    console.log(`sourceDataExtensionName: ${sourceDataExtensionName}`)
+    console.log(`targetDataExtensionName: ${targetDataExtensionName}`)
+    console.log(`queryDescription: ${queryDescription}`)
 
-  let response = await axios({
-    method: 'POST',
-    url: SFDC_URL + '/services/apexrest/qgpt',
-    headers: {'Authorization': `Bearer ${sfdc_accessToken}`, 'Content-Type': 'application/json'},
-    data: JSON.stringify({
-      "useCase": queryDescription,
-      "sourceDataExtension": sourceDataExtensionName,
-      "sourceDataExtensionFields": sourceDataExtensionFields
+    let response = await axios({
+      method: 'POST',
+      url: SFDC_URL + '/services/apexrest/qgpt',
+      headers: {'Authorization': `Bearer ${sfdc_accessToken}`, 'Content-Type': 'application/json'},
+      data: JSON.stringify({
+        "useCase": queryDescription,
+        "sourceDataExtension": sourceDataExtensionName,
+        "sourceDataExtensionFields": sourceDataExtensionFields,
+        "targetDataExtension": targetDataExtensionName,
+        "targetDataExtensionFields": targetDataExtensionFields
+      })
     })
-  })
 
 
-  return {
-    status: "success",
-    result: response.data.result
+    return {
+      status: "success",
+      result: response.data.result
+    }  
+  } catch(error) {
+    return {
+      status: "fail",
+      results: error
+    }
   }
-  // try {
+    // try {
   //   let queryGPTSystemMessage = "Your name is queryGPT and your primary function is to create SQL queries for Salesforce Marketing Cloud Users. You will be provided with the following items and it is your job is to output only the SQL query: 1. Source Target Data Extension name and fields in an array of objects format 2. Target Data Extension name and fields in an array of objects format 3. User input that explains the description of the SQL query that needs to be built. You must use SELECT statements only. Do not use asterisks to grab all fields and instead specify the field names individually. If you are provided a query description that does not clearly result in you returning a SQL query, ask the user to clarify and explain what you need them to clarify."
     
   //   let formattedUserMessage = `My source data extension is ${JSON.stringify(sourceDataExtensionName)}. The following is an array of objects representing the the source data extensions fields as well as any additional metadata needed ${JSON.stringify(sourceDataExtensionFields)}. The field names are stored in the "name" property. The field lengths are stored in "MaxLength". If the field is required then "IsRequired" will equal true. If the field is a primary key then "IsPrimaryKey" will equal true and should be included in the query. ${!targetDataExtensionName ? '' : `My target data extension is ${JSON.stringify(targetDataExtensionName)}`}. The following is an array of objects representing the source data extensions fields as well as any additional metadata needed ${JSON.stringify(targetDataExtensionFields)}.}  Again, the field names are stored in the "name" property. Make sure to adhere to all of Salesforce Marketing Cloud query limitations and considerations. Take the following query description and only output SQL code: ${JSON.stringify(queryDescription)}.`
@@ -436,89 +449,100 @@ function createAssetName(objectType) {
 
 function createDeFieldsFromQuery(query) {
   try {
-    let parsedQuery = sqlParser.parse(query)
-    if (parsedQuery && parsedQuery.type === 'select') {
-      let outputFields = parsedQuery.columns.map(column => column.expr.column)
-
-      let deFields = outputFields.map(field => (
-        {
-          Name: field,
-          FieldType: 'Text',
-          MaxLength: '500',
-          IsRequired: false,
-          IsPrimaryKey: false
-        }
-      ))
-
-      return deFields
+    console.log(query)
+    const parser = new Parser()
+    const opt = { 
+      database: 'TransactSQL'
     }
-  } catch(e) {
-    console.log(e)
+    
+    // grab ast object from parser which parses the query completely
+    let {ast} = parser.parse(query, opt)
+    
+    if (ast && ast.type === 'select') {
+      let outputFields = ast.columns.map(column => {
+        // Check if the column has an alias
+        if (column.as) {
+          return column.as;
+        }
+
+        // Handle aggregate functions and regular fields
+        return column.expr.type === 'function' ? column.expr.name : column.expr.column;
+      });
+
+
+      console.log(outputFields)
+      let deFields = outputFields.map(field => ({
+        Name: field,
+        FieldType: 'Text',
+        MaxLength: '500',
+        IsRequired: false,
+        IsPrimaryKey: false
+      }));
+
+      return deFields;
+    }
+  } catch (error) {
+    console.log(error);
+    return {error}
+
   }
 }
-
   
 async function runQuery(query, targetDataExtensionName) {
   let now = new Date().toISOString()
 
   // Create DE based on query output fields 
-  let newDeFields = createDeFieldsFromQuery(query)
-  let newDeName = createAssetName('DE')
-
-  let newDeOptions = {
-    props: {
-      Name: newDeName,
-      CustomerKey: newDeName,
-      Description: `Data Extension created by QGPT on ${now}`,    
-      DataRetentionPeriodLength: 1,
-      DataRetentionPeriodUnitOfMeasure: 3, // No idea why 3 = "days" for unit of measure but whatever...
-      // DeleteAtEndOfRetentionPeriod: 'true'
-    },
-    columns: newDeFields
-  }
-
-  let newDe = await createDataExtension(newDeOptions)
-
-  let newQueryname = createAssetName('Query') 
-  // create query activity 
-  const queryActivity = {
-    Name: newQueryname,
-    Description: `Created from QGPT`,
-    CustomerKey: newQueryname,
-    QueryText: query,
-    DataExtensionTarget: {
-      CustomerKey: newDeName
-    },
-    TargetType: "DE",
-    TargetUpdateType: "Overwrite"
-  };
-
   try {
+    let newDeFields = createDeFieldsFromQuery(query)
+    let newDeName = createAssetName('DE')  
+
+  
+    let newDeOptions = {
+      props: {
+        Name: newDeName,
+        CustomerKey: newDeName,
+        Description: `Data Extension created by QGPT on ${now}`,    
+        DataRetentionPeriodLength: 1,
+        DataRetentionPeriodUnitOfMeasure: 3, // No idea why 3 = "days" for unit of measure but whatever...
+        // DeleteAtEndOfRetentionPeriod: 'true'
+      },
+      columns: newDeFields
+    }
+
+    let newDe = await createDataExtension(newDeOptions)
+
+    let newQueryname = createAssetName('Query') 
+    // create query activity 
+    const queryActivity = {
+      Name: newQueryname,
+      Description: `Created from QGPT`,
+      CustomerKey: newQueryname,
+      QueryText: query,
+      DataExtensionTarget: {
+        CustomerKey: newDeName
+      },
+      TargetType: "DE",
+      TargetUpdateType: "Overwrite"
+    };
+
     let createQueryResult = await createQuery(queryActivity)
     let createQueryObjectId = createQueryResult.NewObjectID
     let startQueryResult = await startQuery(createQueryObjectId)  
     let queryTaskId = startQueryResult.Result.Task.ID
     let finalQueryStatus = await checkStatusOfQuery(queryTaskId)
     if (finalQueryStatus.Status == 'Complete') {
-      try {
-        let results = await getAllDataExtensionRecords(newDeName, newDeFields.map(field => field.Name))
-        let parsedResults = results.Results.map(record => {
-          // record is an array 
-          let transformedRow = {}
+      let results = await getAllDataExtensionRecords(newDeName, newDeFields.map(field => field.Name))
+      let parsedResults = results.Results.map(record => {
+        // record is an array 
+        let transformedRow = {}
 
-          record.Properties.Property.forEach(column => transformedRow[column.Name] = column.Value)
-          return transformedRow
-        })
-        console.log(parsedResults) 
-        return parsedResults
-
-      } catch(e) {
-        console.log(e)
-      }
+        record.Properties.Property.forEach(column => transformedRow[column.Name] = column.Value)
+        return transformedRow
+      })
+      console.log(parsedResults) 
+      return parsedResults
     }
-  } catch(e) {
-    console.log(e)
-  }
+  } catch(error) {{error}}
 }
 
 

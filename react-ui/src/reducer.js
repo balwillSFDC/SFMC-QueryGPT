@@ -41,7 +41,7 @@ const reducer = (state = initialState, action) => {
         serverAppFlag: action.payload.serverAppFlag,
         runQueryJobId: action.payload.runQueryJobId,
         runQueryJobState: action.payload.runQueryJobState,
-        // runQueryJobResult: action.payload.runQueryJobResult
+        runQueryJobResult: action.payload.runQueryJobResult
       }
     case 'SET_INPUT_VALUE':
       return {
@@ -122,7 +122,8 @@ const reducer = (state = initialState, action) => {
 
     case 'ADD_RUN_QUERY_JOB_TRIGGERED': 
       return {
-        ...state,
+        ...state, 
+        runQueryJobResult:[] 
       }
 
     case 'ADD_RUN_QUERY_JOB_SUCCESS': 
