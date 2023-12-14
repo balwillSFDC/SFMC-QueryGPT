@@ -534,17 +534,27 @@ async function runQuery(query, targetDataExtensionName) {
     let finalQueryStatus = await checkStatusOfQuery(queryTaskId)
     if (finalQueryStatus.Status == 'Complete') {
       let results = await getAllDataExtensionRecords(newDeName, newDeFields.map(field => field.Name))
+      console.log(results)
       let parsedResults = results.Results.map(record => {
         // record is an array 
         let transformedRow = {}
-
-        record.Properties.Property.forEach(column => transformedRow[column.Name] = column.Value)
+        console.log(record)
+        
+        // handle scenarios where there's only 1 column...sfmc is dumb because it will return an object instead of an array of objects
+        if (!Array.isArray(record.Properties.Property)) {
+          transformedRow[record.Properties.Property.Name] = record.Properties.Property.Value
+        } else {
+          record.Properties.Property.forEach(column => transformedRow[column.Name] = column.Value)
+        }
         return transformedRow
       })
       console.log(parsedResults) 
       return parsedResults
     }
-  } catch(error) {{error}}
+  } catch(error) {
+    console.log(error)
+    return {error}
+  }
 }
 
 

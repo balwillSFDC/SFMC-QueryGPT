@@ -19,7 +19,7 @@ const mapDispatchToProps = {
 }
 
 const extractHeaders = (data) => {
-  if (!data) {
+  if (!data || !Array.isArray(data)) {
 		return []
 	} 
 	const headers = new Set();
@@ -69,7 +69,7 @@ class PreviewPanel extends React.Component {
         (this.props.runQueryJobResult?.length === 0 || this.props.runQueryJobResult === undefined) && this.props.runQueryJobState === 'active'  
         ? <Spinner />
         : (
-            <DataTable items={this.props.runQueryJobResult || []} id="previewResults" fixedHeader={true} fixedLayout={true}>
+            <DataTable items={Array.isArray(this.props.runQueryJobResult) ? this.props.runQueryJobResult : []} id="previewResults" fixedHeader={true} fixedLayout={true}>
                 {
 									this.state.headers.map((header) => (
 										<DataTableColumn key={header} label={header} property={header} /> 
