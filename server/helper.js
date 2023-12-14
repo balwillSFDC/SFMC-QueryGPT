@@ -259,7 +259,8 @@ async function retrieveDataExtensionCustomerKey(dataExtensionName) {
       leftOperand: "Name",
       operator: "equals",
       rightOperand: dataExtensionName
-    }
+    },
+    queryAllAccounts: true
   };
   
   return new Promise((resolve, reject) => {
@@ -313,7 +314,8 @@ async function retrieveDataExtensionFields(dataExtensionName) {
       leftOperand: "DataExtension.CustomerKey",
       operator: "equals",
       rightOperand: customerKey
-    }
+    },
+    queryAllAccounts: true
   };
 
   return new Promise((resolve, reject) => {
